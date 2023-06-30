@@ -1,73 +1,86 @@
 import React, { Component } from 'react';
-
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Loader from './Loader/Loader';
-import { fetchPhoto } from './FetchPictures';
-
+import { fetchImages } from './FetchImages';
 import SearchBar from './SearchBar/SearchBar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
+import css from './App.module.css';
 
-import styles from './App.module.css';
-
-class App extends Component {
+export default class App extends Component {
   state = {
-    photos: [],
-    filter: '',
-    numberPage: 1,
-    loading: false,
+    query: '',
+    images: [],
+    isLoading: false,
+    error: '',
+    page: 1,
+    totalHits: null,
   };
 
-  componentDidUpdate = async (prevProps, prevState) => {
-    if (
-      prevState.filter !== this.state.filter ||
-      prevState.numberPage !== this.state.numberPage
-    ) {
-      try {
-        this.setState({ loading: true });
-        const itemPicture = await fetchPhoto(
-          this.state.numberPage,
-          this.state.filter
-        );
+  async componentDidUpdate(prevProps, prevState) {
+    const { query, page, totalHits, images } = this.state;
 
-        const arrayPitures = [...itemPicture.data.hits];
-        if (prevState.filter !== this.state.filter) {
-          this.setState({ photos: arrayPitures });
-        } else {
-          const newArray = [...this.state.photos, ...arrayPitures];
-          this.setState({ photos: newArray });
+    if (query === '') {
+      toast.warn('Please enter your search request');
+      return;
+    }
+
+    if (prevState.query !== query || prevState.page !== page) {
+      try {
+        this.setState({ isLoading: true });
+        const { hits, totalHits } = await fetchImages(query, page);
+        if (hits.length === 0) {
+          toast.error(
+            'Sorry, there are no images matching your search query. Please try again.'
+          );
+          return;
         }
+        if (hits.length > 0 && page === 1) {
+          toast.success(`Hooray! We found ${totalHits} images!`);
+        }
+
+        const images = hits.map(({ id, largeImageURL, webformatURL, tags }) => {
+          return { id, largeImageURL, webformatURL, tags };
+        });
+
+        return this.setState(prevState => ({
+          images: [...prevState.images, ...images],
+          totalHits: totalHits,
+        }));
       } catch (error) {
-        console.log(error);
+        this.setState({ error: error.message });
+        console.log(error.message);
       } finally {
-        this.setState({ loading: false });
+        this.setState({ isLoading: false });
       }
     }
-  };
 
-  onAddMore = () => {
-    this.setState({ numberPage: this.state.numberPage + 1 });
-  };
-
-  onSubmit = e => {
-    e.preventDefault();
-    const wordForSearch = e.target.elements.search.value.trim();
-    if (wordForSearch) {
-      this.setState({ filter: wordForSearch });
+    if (totalHits !== null && totalHits <= images.length) {
+      toast.info(`We're sorry, but you've reached the end of search results.`);
     }
+  }
+
+  handleSearch = query => {
+    this.setState({ query, images: [], page: 1 });
+  };
+
+  handleLoadMore = () => {
+    this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
   render() {
-    const { photos, loading } = this.state;
+    const { images, isLoading, page, totalHits } = this.state;
+    const showButton = images.length > 0 && totalHits > page * 12 && !isLoading;
+
     return (
-      <div className={styles.App}>
-        <SearchBar onSubmit={this.onSubmit}></SearchBar>
-        {loading && <Loader></Loader>}
-        {!loading && <ImageGallery photoList={photos}></ImageGallery>}
-        {photos.length > 0 && !loading && (
-          <Button onClick={this.onAddMore}></Button>
-        )}
-      </div>
+      <>
+          <div className={css.App}>
+        <SearchBar onSubmit={this.handleSearch} />
+        {images?.length > 0 && <ImageGallery images={images} />}
+        {showButton && <Button onClick={this.handleLoadMore} />}
+        {isLoading && <Loader />}
+         </div></>
     );
   }
 }
-export default App;

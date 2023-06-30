@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import styles from './Modal.module.css';
+import css from './Modal.module.css';
 
 export default class Module extends Component {
   componentDidMount = () => {
-    window.addEventListener('keydown', this.handleKeyDown);
+    document.addEventListener('keydown', this.handleKeyDown);
   };
   componentWillUnmount = () => {
-    window.removeEventListener('keydown', this.handleKeyDown);
+   document.removeEventListener('keydown', this.handleKeyDown);
   };
 
   handleKeyDown = e => {
@@ -25,8 +25,8 @@ export default class Module extends Component {
   render() {
     const { src, alt } = this.props;
     return (
-      <div className={styles.overlay} onClick={this.handleBackDropClick}>
-        <div className={styles.modal}>
+      <div className={css.overlay} onClick={this.handleBackDropClick}>
+        <div className={css.modal}>
           <img src={src} alt={alt} />
         </div>
       </div>

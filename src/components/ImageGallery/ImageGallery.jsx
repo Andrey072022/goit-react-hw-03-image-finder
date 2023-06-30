@@ -1,36 +1,35 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
 
-import styles from './ImageGallery.module.css';
+import css from './ImageGallery.module.css';
 
-class ImageGallery extends Component {
-  render() {
-    const { photoList } = this.props;
-    return (
-      <ul className={styles.ImageGallery}>
-        {photoList.map(({ webformatURL, tags, largeImageURL }, index) => (
+export const imageGallery = ({ images }) => {
+  return (
+    <ul className={css.imageGallery}>
+      {images &&
+        images.map(({ id, webformatURL, tags, largeImageURL }) => (
           <ImageGalleryItem
-            key={index}
-            url={webformatURL}
-            alt={tags}
-            largeImageURL={largeImageURL}
-          ></ImageGalleryItem>
+            key={id}
+            image={webformatURL}
+            tags={tags}
+            modalImage={largeImageURL}
+          />
         ))}
-      </ul>
-    );
-  }
-}
+    </ul>
+  );
+};
 
-export default ImageGallery;
+export default imageGallery;
 
-ImageGallery.propTypes = {
-  photoList: PropTypes.arrayOf(
+imageGallery.propTypes = {
+  images: PropTypes.arrayOf(
     PropTypes.shape({
+      id: PropTypes.number.isRequired,
       webformatURL: PropTypes.string.isRequired,
       tags: PropTypes.string.isRequired,
       largeImageURL: PropTypes.string.isRequired,
     })
-  ),
+  ).isRequired,
 };

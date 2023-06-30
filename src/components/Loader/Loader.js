@@ -1,25 +1,24 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { MagnifyingGlass } from 'react-loader-spinner';
 
-import styles from './Loader.module.css';
+import css from './Loader.module.css';
 
-class Loader extends Component {
-  render() {
-    return (
-      <div className={styles['loader-wrapper']}>
-        <MagnifyingGlass
-          visible={true}
-          height="80"
-          width="80"
-          ariaLabel="MagnifyingGlass-loading"
-          wrapperStyle={{}}
-          wrapperClass="MagnifyingGlass-wrapper"
-          glassColor="#c0efff"
-          color="#e15b64"
-        />
-      </div>
-    );
-  }
-}
+export const loader = () => {
+  return (
+    <div className={css.loader_wrapper}>
+      <MagnifyingGlass
+        visible={true}
+        height="80"
+        width="80"
+        ariaLabel="MagnifyingGlass-loading"
+        wrapperStyle={{}}
+        wrapperClass="MagnifyingGlass-wrapper"
+        glassColor="#c0efff"
+        color="#e15b64"
+      />
+    </div>
+  );
+};
 
-export default Loader;
+export default loader;
+
